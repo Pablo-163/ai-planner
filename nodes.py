@@ -53,3 +53,49 @@ def parse_goal_node(state: PlannerState) -> PlannerState:
     state["missing_fields"] = data.get("missing_fields", [])
 
     return state
+
+def handle_missing_info(state):
+    '''
+    Простая обработка пропущенных значений
+    '''
+    if state["missing_fields"]:
+        fields = ", ".join(state["missing_fields"])
+        state["final_plan"] = (
+            f"Недостаточно данных для построения плана. "
+            f"Уточни: {fields}."
+        )
+    return state
+
+from llm import invoke_json
+
+def build_subtasks_node(state):
+    prompt = f"""
+                Верни только один JSON-блок в формате ```json ... ```.
+
+                Пользовательская цель:
+                {state["user_goal"]}
+
+                Параметры:
+                - deadline: {state["deadline"]}
+                - available_time_per_day: {state["available_time_per_day"]}
+                - user_level: {state["user_level"]}
+
+                Нужно:
+                - разбить цель на 5-8 логичных подзадач
+                - подзадачи должны быть короткими и конкретными
+                - не дублируй похожие пункты
+                - учитывай уровень пользователя и срок
+
+                Формат ответа:
+                {{
+                "subtasks": [
+                    "подзадача 1",
+                    "подзадача 2",
+                    "подзадача 3"
+                ]
+                }}
+              """
+
+    data = invoke_json(prompt)
+    state["subtasks"] = data.get("subtasks", [])
+    return state
