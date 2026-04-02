@@ -99,3 +99,38 @@ def build_subtasks_node(state):
     data = invoke_json(prompt)
     state["subtasks"] = data.get("subtasks", [])
     return state
+
+from llm import invoke_text
+
+def build_plan_node(state):
+    '''
+    Финальный ответ
+    '''
+    subtasks_text = "\n".join(f"- {task}" for task in state["subtasks"])
+
+    prompt = f"""
+        Составь реалистичный и краткий пошаговый план для пользователя.
+
+        Цель:
+        {state["user_goal"]}
+
+        Параметры:
+        - deadline: {state["deadline"]}
+        - available_time_per_day: {state["available_time_per_day"]}
+        - user_level: {state["user_level"]}
+
+        Подзадачи:
+        {subtasks_text}
+
+        Требования к ответу:
+        - ответ на русском языке
+        - план должен быть практичным и реалистичным
+        - разбей план на этапы или дни
+        - не делай ответ слишком длинным
+        - в конце добавь 2-3 короткие рекомендации
+
+        Верни только итоговый текст плана, без пояснений про формат.
+        """
+
+    state["final_plan"] = invoke_text(prompt)
+    return state
