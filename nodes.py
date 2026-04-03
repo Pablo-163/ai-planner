@@ -1,7 +1,7 @@
 from state import PlannerState
 from llm import invoke_json
+from llm import invoke_text
 #from llm import get_llm
-import json
 
 '''
 def invoke_json(prompt: str) -> dict:
@@ -66,9 +66,11 @@ def handle_missing_info(state):
         )
     return state
 
-from llm import invoke_json
 
 def build_subtasks_node(state):
+    '''
+    Разбиение на подзадачи
+    '''
     prompt = f"""
                 Верни только один JSON-блок в формате ```json ... ```.
 
@@ -100,11 +102,10 @@ def build_subtasks_node(state):
     state["subtasks"] = data.get("subtasks", [])
     return state
 
-from llm import invoke_text
 
 def build_plan_node(state):
     '''
-    Финальный ответ
+    Финальный ответ с конечныс планом действий
     '''
     subtasks_text = "\n".join(f"- {task}" for task in state["subtasks"])
 

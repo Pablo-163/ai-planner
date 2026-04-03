@@ -27,7 +27,7 @@ def route_after_parse(state: PlannerState) -> str:
 
 def build_graph():
     '''
-    Основной граф состояний помошника
+    Основной граф состояний помощника
     '''
     builder = StateGraph(PlannerState)
 
@@ -36,6 +36,7 @@ def build_graph():
     builder.add_node("build_subtasks", build_subtasks_node)
     builder.add_node("build_plan", build_plan_node)
 
+    # первое - парсим запрос пользователя
     builder.set_entry_point("parse_goal")
 
     builder.add_conditional_edges(
